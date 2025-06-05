@@ -6,6 +6,6 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://nicolaspafundi.github.io/JaponesDev/") });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://nicolaspafundi.github.io/Japones") });
 
 await builder.Build().RunAsync();

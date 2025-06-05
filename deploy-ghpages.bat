@@ -1,41 +1,28 @@
 @echo off
-setlocal
+echo ===== PUBLICANDO EL PROYECTO =====
 
-:: CONFIGURACIÓN
-set REPO_URL=https://github.com/NicolasPafundi/JaponesDev.git
-set BRANCH=gh-pages
-set PUBLISH_DIR=publish_output
+REM Publicar Blazor WASM
+dotnet publish -c Release
 
-echo ===== PUBLICANDO EL PROYECTO BLazor WASM =====
-dotnet publish -c Release -o %PUBLISH_DIR%
+REM Eliminar carpeta temporal si ya existe
+rmdir /S /Q _publish
+mkdir _publish
 
-if not exist "%PUBLISH_DIR%\wwwroot" (
-    echo ERROR: No se encontró el directorio %PUBLISH_DIR%\wwwroot
-    pause
-    exit /b 1
-)
+REM Copiar solo el contenido dentro de la subcarpeta correcta
+xcopy /E /I /Y Japones\bin\Release\net8.0\publish\wwwroot\Japones\* _publish
 
-echo ===== CLONANDO RAMA gh-pages =====
-rmdir /s /q temp_gh_pages 2>nul
-git clone -b %BRANCH% %REPO_URL% temp_gh_pages
+REM Inicializar repositorio temporal
+cd _publish
+git init
+git remote add origin https://github.com/nicolaspafundi/Japones.git
+git checkout -b gh-pages
 
-cd temp_gh_pages
-
-echo ===== LIMPIANDO ARCHIVOS ANTERIORES =====
-del /q *.* >nul 2>&1
-rmdir /s /q * >nul 2>&1
-
-echo ===== COPIANDO NUEVOS ARCHIVOS =====
-xcopy /E /Y /I ..\%PUBLISH_DIR%\wwwroot\* .
-
-echo ===== COMMIT Y PUSH =====
+REM Subir contenido al branch gh-pages
 git add .
 git commit -m "Deploy Blazor to GitHub Pages"
-git push origin %BRANCH%
+git push -f origin gh-pages
 
 cd ..
-rmdir /s /q temp_gh_pages
-rmdir /s /q %PUBLISH_DIR%
-
-echo ===== PUBLICADO CORRECTAMENTE =====
+rmdir /S /Q _publish
+echo ===== DEPLOY COMPLETADO =====
 pause
