@@ -1,0 +1,22 @@
+﻿@page "/Capitulos"
+
+<h1 class="text-2xl font-bold text-blue-600 text-center mb-6">📘 Capítulos</h1>
+
+<div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 max-w-5xl mx-auto">
+    @foreach (var cap in caps)
+    {
+        <NavLink class="block bg-white border border-gray-300 rounded-xl p-6 text-center shadow hover:shadow-lg transition"
+                 href="@($"/Capitulo/{cap.Id}")">
+            <h2 class="text-lg font-semibold text-blue-700">@cap.Titulo</h2>
+        </NavLink>
+    }
+</div>
+
+@code {
+    private List<CapituloModel> caps = new()
+    {
+        new CapituloModel { Id = 1, Titulo = "Capítulo 1: Saludos" },
+        new CapituloModel { Id = 2, Titulo = "Capítulo 2: Verbos básicos" },
+        new CapituloModel { Id = 3, Titulo = "Capítulo 3: Partículas" },
+    };
+}

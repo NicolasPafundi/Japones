@@ -1,0 +1,37 @@
+﻿@page "/capitulo/{Id:int}/vocabulario"
+@inject HttpClient Http
+
+<h1 class="text-xl font-bold text-yellow-600 text-center mb-6">📚 Vocabulario – Capítulo @Id</h1>
+
+@if (Items is null)
+{
+    <p class="text-center text-gray-500">Cargando...</p>
+}
+else if (!Items.Any())
+{
+    <p class="text-center text-red-500">No se encontró vocabulario para este capítulo.</p>
+}
+else
+{
+    <ul class="max-w-xl mx-auto space-y-3">
+        @foreach (var palabra in Items)
+        {
+            <li class="bg-yellow-50 p-4 rounded border shadow">
+                <strong>@palabra.Japonés</strong> – @palabra.Español
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private List<VocabularioModel>? Items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var all = await Http.GetFromJsonAsync<List<VocabularioModel>>("data/vocabulario.json");
+        Items = all?.Where(x => x.CapituloId == Id).ToList();
+    }
+}

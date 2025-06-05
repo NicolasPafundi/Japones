@@ -1,0 +1,23 @@
+﻿@page "/Capitulo/{Id:int}"
+@inject NavigationManager Nav
+
+<h1 class="text-xl font-bold text-blue-600 text-center mb-6">📘 Capítulo @Id</h1>
+
+<p class="text-center text-gray-700 mb-6">Seleccioná qué querés estudiar:</p>
+
+<div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 max-w-xl mx-auto">
+    <NavLink class="block bg-green-100 text-green-900 p-6 rounded-xl text-center shadow hover:bg-green-200 transition"
+             href="@($"/Capitulo/{Id}/Gramatica")">
+        🧠 Gramática
+    </NavLink>
+
+    <NavLink class="block bg-yellow-100 text-yellow-900 p-6 rounded-xl text-center shadow hover:bg-yellow-200 transition"
+             href="@($"/Capitulo/{Id}/Vocabulario")">
+        📚 Vocabulario
+    </NavLink>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+}

@@ -1,0 +1,111 @@
+﻿@page "/Quizz/Start"
+@using System.Web
+@inject NavigationManager Nav
+@inject HttpClient Http
+
+<h1 class="text-xl font-bold text-purple-600 text-center mb-6">📝 Quizz</h1>
+
+@if (PreguntasFiltradas == null)
+{
+    <p class="text-center text-gray-600">Cargando preguntas...</p>
+}
+else if (!PreguntasFiltradas.Any())
+{
+    <p class="text-center text-red-600">No hay preguntas disponibles para esos capítulos.</p>
+}
+else
+{
+    var actual = PreguntasFiltradas[Indice];
+
+    <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow border mb-6">
+        <h2 class="text-lg font-semibold mb-4 text-gray-800">@actual.Enunciado</h2>
+
+        @foreach (var opcion in actual.Opciones)
+        {
+            <button class="block w-full text-left px-4 py-2 mb-2 rounded border hover:bg-purple-100 transition
+                                   @(RespuestaSeleccionada == opcion ? (opcion == actual.RespuestaCorrecta ? "bg-green-200" : "bg-red-200") : "")"
+                    @onclick="() => SeleccionarRespuesta(opcion)"
+                    disabled="@YaRespondida">
+                @opcion
+            </button>
+        }
+    </div>
+
+    <div class="flex justify-between max-w-xl mx-auto">
+        <span class="text-gray-600">Pregunta @(Indice + 1) de @PreguntasFiltradas.Count</span>
+        <span class="text-gray-600">✅ Correctas: @Correctas</span>
+    </div>
+
+    @if (YaRespondida && !EsUltima)
+    {
+        <div class="mt-6 flex justify-center">
+            <button class="bg-purple-600 text-white px-6 py-2 rounded-full shadow hover:bg-purple-700"
+                    @onclick="SiguientePregunta">
+                Siguiente ➡️
+            </button>
+        </div>
+    }
+    else if (YaRespondida && EsUltima)
+    {
+        <div class="mt-6 text-center">
+            <p class="text-green-600 font-semibold mb-3">🎉 ¡Quizz completado!</p>
+            <button class="bg-blue-600 text-white px-6 py-2 rounded-full shadow hover:bg-blue-700"
+                    @onclick="@(() => Nav.NavigateTo("/Quizz"))">
+                Volver al inicio
+            </button>
+        </div>
+    }
+}
+
+@code {
+    private List<PreguntaModel>? TodasLasPreguntas;
+    private List<PreguntaModel> PreguntasFiltradas = new();
+    private List<int> CapitulosSeleccionados = new();
+
+    private int Indice = 0;
+    private string? RespuestaSeleccionada;
+    private int Correctas = 0;
+
+    private bool YaRespondida => RespuestaSeleccionada != null;
+    private bool EsUltima => Indice >= PreguntasFiltradas.Count - 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+        var query = HttpUtility.ParseQueryString(uri.Query);
+        var ids = query["ids"]?.Split(",").Select(id => int.TryParse(id, out var n) ? n : -1).Where(n => n > 0).ToList();
+
+        if (ids is null || ids.Count == 0)
+        {
+            Nav.NavigateTo("/Quizz");
+            return;
+        }
+
+        CapitulosSeleccionados = ids;
+
+        TodasLasPreguntas = await Http.GetFromJsonAsync<List<PreguntaModel>>("data/preguntas.json");
+        PreguntasFiltradas = TodasLasPreguntas?
+            .Where(p => CapitulosSeleccionados.Contains(p.Capitulo))
+            .OrderBy(_ => Guid.NewGuid()) // aleatorizar
+            .ToList() ?? new();
+    }
+
+    private void SeleccionarRespuesta(string opcion)
+    {
+        if (YaRespondida) return;
+
+        RespuestaSeleccionada = opcion;
+
+        if (RespuestaSeleccionada == PreguntasFiltradas[Indice].RespuestaCorrecta)
+            Correctas++;
+    }
+
+    private void SiguientePregunta()
+    {
+        if (!EsUltima)
+        {
+            Indice++;
+            RespuestaSeleccionada = null;
+        }
+    }
+}

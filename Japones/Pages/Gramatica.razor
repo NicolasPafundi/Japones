@@ -1,0 +1,38 @@
+﻿@page "/Capitulo/{Id:int}/Gramatica"
+@inject HttpClient Http
+
+<h1 class="text-xl font-bold text-green-700 text-center mb-6">🧠 Gramática – Capítulo @Id</h1>
+
+@if (Items is null)
+{
+    <p class="text-center text-gray-500">Cargando...</p>
+}
+else if (!Items.Any())
+{
+    <p class="text-center text-red-500">No hay temas de gramática en este capítulo.</p>
+}
+else
+{
+    <div class="max-w-2xl mx-auto space-y-4">
+        @foreach (var item in Items)
+        {
+            <div class="bg-green-50 p-4 rounded-lg border shadow">
+                <h2 class="font-semibold text-lg text-green-800">@item.Titulo</h2>
+                <p class="text-gray-700 mt-1">@item.Explicacion</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private List<GramaticaModel>? Items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var all = await Http.GetFromJsonAsync<List<GramaticaModel>>("data/Gramatica.json");
+        Items = all?.Where(x => x.CapituloId == Id).ToList();
+    }
+}
