@@ -83,7 +83,7 @@ else
 
         CapitulosSeleccionados = ids;
 
-        TodasLasPreguntas = await Http.GetFromJsonAsync<List<PreguntaModel>>("data/preguntas.json");
+        TodasLasPreguntas = await Http.GetFromJsonAsync<List<PreguntaModel>>("data/Preguntas.json");
         PreguntasFiltradas = TodasLasPreguntas?
             .Where(p => CapitulosSeleccionados.Contains(p.Capitulo))
             .OrderBy(_ => Guid.NewGuid()) // aleatorizar
